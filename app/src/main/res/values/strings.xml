@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">lab7</string>
+    <string name="title_activity_notification_source">NotificationSource</string>
+    <string name="title_activity_notification_composable">NotificationComposable</string>
+</resources>
