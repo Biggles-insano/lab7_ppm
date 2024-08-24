@@ -11,10 +11,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,7 +29,6 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-// Modelo y generación de notificaciones
 
 data class Notification(
     val id: Int,
@@ -40,16 +41,18 @@ data class Notification(
 enum class NotificationType {
     INFO,
     TRAINING,
+    ALERT,
+    UPDATE
 }
 
 fun generateFakeNotifications(): List<Notification> {
     return List(50) { index ->
-        val type = NotificationType.values()[index % 2]
+        val type = NotificationType.values()[index % 4]
         Notification(
             id = index,
             type = type,
-            title = "Notificación ${type.name}",
-            message = "Mensaje de ejemplo para ${type.name}",
+            title = "Ola jomlander ${type.name}",
+            message = "ola, soi jomlander",
             date = "19 ago - 2:30 p.m."
         )
     }.shuffled()
@@ -84,6 +87,7 @@ fun NotificationScreen() {
 }
 
 
+
 @Composable
 fun FilterSection(selectedFilter: NotificationType?, onFilterSelected: (NotificationType) -> Unit) {
     Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxWidth()) {
@@ -93,7 +97,12 @@ fun FilterSection(selectedFilter: NotificationType?, onFilterSelected: (Notifica
         FilterButton("Capacitaciones", selectedFilter == NotificationType.TRAINING) {
             onFilterSelected(NotificationType.TRAINING)
         }
-
+        FilterButton("Alertas", selectedFilter == NotificationType.ALERT) {
+            onFilterSelected(NotificationType.ALERT)
+        }
+        FilterButton("Actualizaciones", selectedFilter == NotificationType.UPDATE) {
+            onFilterSelected(NotificationType.UPDATE)
+        }
     }
 }
 
@@ -102,8 +111,8 @@ fun FilterButton(text: String, isSelected: Boolean, onClick: () -> Unit) {
     Button(
         onClick = onClick,
         colors = ButtonDefaults.buttonColors(
-            containerColor = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.3f) else MaterialTheme.colorScheme.surface,
-            contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+            containerColor = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.3f) else Color.LightGray, // Color para el fondo del botón cuando no está seleccionado
+            contentColor = if (isSelected) MaterialTheme.colorScheme.onPrimary else Color.DarkGray // Color para el texto cuando no está seleccionado
         ),
         modifier = Modifier.padding(4.dp)
     ) {
@@ -115,18 +124,24 @@ fun FilterButton(text: String, isSelected: Boolean, onClick: () -> Unit) {
 @Composable
 fun NotificationItem(notification: Notification) {
     val icon = when (notification.type) {
-        NotificationType.INFO -> painterResource(id = android.R.drawable.ic_dialog_info)
-        NotificationType.TRAINING -> painterResource(id = android.R.drawable.ic_menu_info_details)
+        NotificationType.INFO -> Icons.Default.Info
+        NotificationType.TRAINING -> Icons.Default.Face
+        NotificationType.ALERT -> Icons.Default.Warning
+        NotificationType.UPDATE -> Icons.Default.Notifications
     }
 
     val backgroundColor = when (notification.type) {
         NotificationType.INFO -> MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
         NotificationType.TRAINING -> MaterialTheme.colorScheme.secondary.copy(alpha = 0.1f)
+        NotificationType.ALERT -> MaterialTheme.colorScheme.error.copy(alpha = 0.1f)
+        NotificationType.UPDATE -> MaterialTheme.colorScheme.tertiary.copy(alpha = 0.1f)
     }
 
     val iconTint = when (notification.type) {
         NotificationType.INFO -> MaterialTheme.colorScheme.primary
         NotificationType.TRAINING -> MaterialTheme.colorScheme.secondary
+        NotificationType.ALERT -> MaterialTheme.colorScheme.error
+        NotificationType.UPDATE -> MaterialTheme.colorScheme.tertiary
     }
 
     Card(
@@ -141,7 +156,7 @@ fun NotificationItem(notification: Notification) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                painter = icon,
+                imageVector = icon,
                 contentDescription = null,
                 tint = iconTint,
                 modifier = Modifier.size(40.dp)
